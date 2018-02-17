@@ -40,7 +40,6 @@ function addRoute(path, method = 'GET', inputFile = `./fixtures${path}.json`) {
   });
 }
 
-// ADD ROUTES HERE
 addRoute('/test');
 
 server.get('/apod', function getApod(req, res, next) {
@@ -57,12 +56,13 @@ server.get('/apod', function getApod(req, res, next) {
 // direction = south | north
 server.get('/train/:direction/:station', function getUtaSchedule(req, res, next) {
   const date = new Date();
-  const TODAY = (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
+  const TODAY = (date.getMonth() + 1).toString().padStart(2, "0") + '-' + date.getDate().toString().padStart(2, "0") + '-' +  date.getFullYear();
   const DIRECTION = req.params.direction.toLowerCase().indexOf('south') > -1 ? 'SOUTHBOUND' : 'NORTHBOUND';
   const STATION = `${req.params.station}+Station`;
+  const body = `date=${TODAY}&direction=${DIRECTION}&stops%5B%5D=${STATION}&routeNumber=750`;
   fetch('http://www.rideuta.com/api/route/indexgrid', {
         method: 'POST',
-        body: `date=${TODAY}&direction=${DIRECTION}&stops%5B%5D=${STATION}&routeNumber=750`,
+        body: body,
         mode: 'cors',
         headers: {
           'Accept': 'application/json',
@@ -90,12 +90,14 @@ server.get('/weather/:type/:zip', function getWeather(req, res, next) {
       break;
     case 'forecast':
       weather.getWeatherForecastForDays(3, function(err, obj){
+        res.status(obj.cod);
         res.json(obj);
         return next();
       });
     default:
-      weather.getAllWeather(function(err, JSONObj){
-        res.json(JSONObj);
+      weather.getAllWeather(function(err, obj){
+        res.status(obj.cod);
+        res.json(obj);
         return next();
       });
   }

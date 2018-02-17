@@ -20,14 +20,15 @@
             });
         });
       }
-      getResponse(`${API_BASE}/weather/temp/84606`);
       getResponse(`${API_BASE}/weather/forecast/84606`);
+      getResponse(`${API_BASE}/weather/temp/84606`);
+      getResponse(`${API_BASE}/weather/whatever/84606`);
       getResponse(`${API_BASE}/apod`)
         .then(data => {
           document.body.style.background = `url("${data.url}") center center / cover no-repeat fixed`;
         });
-      getResponse(`${API_BASE}/train/north/provo`);
-      getResponse(`${API_BASE}/train/south/lehi`);
+      getResponse(`${API_BASE}/train/north/Provo+Central`);
+      getResponse(`${API_BASE}/train/south/Lehi`);
     </script>
     <meta charset="utf-8">
     <title></title>
