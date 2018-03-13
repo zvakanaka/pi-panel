@@ -1,6 +1,7 @@
 const restify = require('restify');
 const plugins = require('restify-plugins');
 const logger = require('morgan');
+const colorJson = require('color-json');
 const fs = require('fs');
 const fetch = require('node-fetch');
 require('dotenv').config();
@@ -20,28 +21,25 @@ server.use(
     return next();
   }
 );
+
+/* LOGGING */
 server.use(logger('dev'));
-server.use(function testMiddleWare(req, res, next) {
-  // console.log('hihihihihihihi');
+
+server.use(function reqBodyLog(req, res, next) {
+  if (typeof req.body !== 'undefined') console.log(colorJson(req.body));
   return next();
 });
 
-function addRoute(path, method = 'GET', inputFile = `./fixtures${path}.json`) {
-  server[method.toLowerCase()](path, function (req, res, next) {
-    res.setHeader('Content-Type', 'application/json');
-    fs.readFile(inputFile, 'utf8', function (err, data) {
-      if (err) {
-        res.status(500);
-        res.json(err);
-      }
-      res.json(JSON.parse(data));
-      return next();
-    });
-  });
-}
+/* STATIC FILES */
+server.get(/\/public\/?.*/, restify.serveStatic({
+  directory: __dirname
+}));
 
-addRoute('/test');
+server.get('/', function (req, res, next) {
+    res.redirect('/public/index.html', next);
+});
 
+/* API */
 server.get('/apod', function getApod(req, res, next) {
   res.setHeader('Content-Type', 'application/json');
   fetch(`https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}`)
@@ -102,7 +100,6 @@ server.get('/weather/:type/:zip', function getWeather(req, res, next) {
       });
   }
 });
-
 
 server.listen(process.env.PORT || 8080, function () {
   console.log('%s listening at %s', server.name, server.url);
